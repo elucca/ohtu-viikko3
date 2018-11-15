@@ -9,24 +9,37 @@ public class Main {
     public static void main(String[] args) throws IOException {
         // ÄLÄ laita githubiin omaa opiskelijanumeroasi
         String studentNr = "012345678";
-        if ( args.length>0) {
+        if (args.length > 0) {
             studentNr = args[0];
         }
 
-        String url = "https://studies.cs.helsinki.fi/courses/students/"+studentNr+"/submissions";
+        String url = "https://studies.cs.helsinki.fi/courses/students/" + studentNr + "/submissions";
 
         String bodyText = Request.Get(url).execute().returnContent().asString();
 
-        System.out.println("json-muotoinen data:");
-        System.out.println( bodyText );
-
+        //System.out.println("json-muotoinen data:");
+        //System.out.println( bodyText );
         Gson mapper = new Gson();
         Submission[] subs = mapper.fromJson(bodyText, Submission[].class);
-        
-        System.out.println("Oliot:");
+
+        System.out.println("Opiskelijanumero: " + studentNr);
+        System.out.println("");
         for (Submission submission : subs) {
-            System.out.println(submission);
+            System.out.println(" " + submission);
         }
+
+        int totalExercises = 0;
+        for (Submission sub : subs) {
+            totalExercises += sub.getExercises().size();
+        }
+
+        int totalTime = 0;
+        for (Submission sub : subs) {
+            totalTime += sub.getHours();
+        }
+
+        System.out.println("");
+        System.out.println("Yhteensä: " + totalExercises + " tehtävää " + totalTime + " tuntia");
 
     }
 }
