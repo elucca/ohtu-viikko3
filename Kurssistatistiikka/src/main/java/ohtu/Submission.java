@@ -13,7 +13,7 @@ public class Submission {
     public Submission() {
         this.exercises = new ArrayList<>();
     }
-
+    
     public void setWeek(int week) {
         this.week = week;
     }
@@ -48,7 +48,7 @@ public class Submission {
 
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder(course + ", viikko " + week + " tehtyjä tehtäviä yhteensä " + exercises.size() + " aikaa kului " + hours + " tehdyt tehtävät: ");
+        StringBuilder s = new StringBuilder("viikko " + week + " tehtyjä tehtäviä yhteensä " + exercises.size() + " aikaa kului " + hours + " tehdyt tehtävät: ");
         for (int i = 0; i < exercises.size(); i++) {
             if (i == exercises.size() - 1) {
                 s.append(exercises.get(i));
