@@ -60,7 +60,7 @@ public class KauppaTest {
         when(varasto.saldo(1)).thenReturn(10);
         when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
         when(varasto.saldo(2)).thenReturn(8);
-        when(varasto.haeTuote(2)).thenReturn(new Tuote(1, "omenamehu", 2));
+        when(varasto.haeTuote(2)).thenReturn(new Tuote(2, "omenamehu", 2));
 
         // ostokset
         kauppa.aloitaAsiointi();
@@ -108,8 +108,8 @@ public class KauppaTest {
         // ja tuote 2 on omenamehu jonka hinta on 2 ja saldo 8
         when(varasto.saldo(1)).thenReturn(10);
         when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
-        when(varasto.saldo(2)).thenReturn(8);
-        when(varasto.haeTuote(2)).thenReturn(new Tuote(1, "omenamehu", 0));
+        when(varasto.saldo(2)).thenReturn(0);
+        when(varasto.haeTuote(2)).thenReturn(new Tuote(2, "omenamehu", 2));
 
         // ostokset
         kauppa.aloitaAsiointi();
@@ -119,5 +119,74 @@ public class KauppaTest {
 
         // varmistus
         verify(pankki).tilisiirto(eq("pekka"), eq(42), eq("12345"), anyString(), eq(5));
+    }
+
+    /*
+    varmistettava, että metodin aloitaAsiointi kutsuminen nollaa edellisen ostoksen
+    tiedot (eli edellisen ostoksen hinta ei näy uuden ostoksen hinnassa)
+     */
+    @Test
+    public void aloitaAsiointiNollaaEdellisenOstoksenTiedot() {
+        // määritellään että viitegeneraattori palauttaa viitten 42s
+        when(viite.uusi()).thenReturn(42);
+        // määritellään että tuote numero 1 on maito jonka hinta on 5 ja saldo 10
+        when(varasto.saldo(1)).thenReturn(10);
+        when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
+
+        // ostokset
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+
+        when(viite.uusi()).thenReturn(1);
+
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+
+        // varmistus
+        verify(pankki).tilisiirto(eq("pekka"), eq(1), eq("12345"), anyString(), eq(5));
+    }
+
+    /*
+    varmistettava, että kauppa pyytää uuden viitenumeron jokaiselle maksutapahtumalle
+     */
+    @Test
+    public void kauppaPyytaaUudenViitenumeronJokaTapahtumalle() {
+        when(varasto.saldo(1)).thenReturn(10);
+        when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
+
+        // ostokset
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.tilimaksu("pekka", "12345");
+
+        verify(viite, times(2)).uusi();
+    }
+
+    @Test
+    public void koristaPoistaminenOnnistuu() {
+        // määritellään että viitegeneraattori palauttaa viitten 42s
+        when(viite.uusi()).thenReturn(42);
+        // määritellään että tuote numero 1 on maito jonka hinta on 5 ja saldo 10,
+        // ja tuote 2 on omenamehu jonka hinta on 2 ja saldo 8
+        when(varasto.saldo(1)).thenReturn(10);
+        when(varasto.haeTuote(1)).thenReturn(new Tuote(1, "maito", 5));
+        when(varasto.saldo(2)).thenReturn(8);
+        when(varasto.haeTuote(2)).thenReturn(new Tuote(2, "omenamehu", 2));
+
+        // ostokset
+        kauppa.aloitaAsiointi();
+        kauppa.lisaaKoriin(1);
+        kauppa.lisaaKoriin(2);
+        kauppa.poistaKorista(2);
+        kauppa.tilimaksu("pekka", "12345");
+        // varmistus
+        verify(pankki).tilisiirto(eq("pekka"), eq(42), eq("12345"), anyString(), eq(5));
+
     }
 }
