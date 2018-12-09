@@ -13,4 +13,5 @@ public class Summa extends Laskuoperaatio {
     public void laske(int arvo) {
         super.getSovellus().plus(arvo);
     }
+ 
 }

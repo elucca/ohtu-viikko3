@@ -10,6 +10,7 @@ public abstract class Laskuoperaatio implements Komento {
     private Button nollaa;
     private Button undo;
     private Sovelluslogiikka sovellus;
+    private int edellinenTulos;
 
     public Laskuoperaatio(TextField tuloskentta, TextField syotekentta, Button nollaa, Button undo, Sovelluslogiikka sovellus) {
         this.tuloskentta = tuloskentta;
@@ -21,6 +22,8 @@ public abstract class Laskuoperaatio implements Komento {
 
     @Override
     public void suorita() {
+        edellinenTulos = sovellus.tulos();
+
         int arvo = 0;
 
         try {
@@ -29,7 +32,7 @@ public abstract class Laskuoperaatio implements Komento {
         }
 
         laske(arvo);
-        
+
         int laskunTulos = sovellus.tulos();
         syotekentta.setText("");
         tuloskentta.setText("" + laskunTulos);
@@ -43,9 +46,24 @@ public abstract class Laskuoperaatio implements Komento {
     }
 
     public abstract void laske(int arvo);
-    
+
     public Sovelluslogiikka getSovellus() {
         return sovellus;
+    }
+
+    public void peru() {
+        // Tähän nyt jäi vähän ikävää pastaa jonka hoitaisin pois jos olisi enemmän aikaa
+        sovellus.setTulos(edellinenTulos);
+        int laskunTulos = sovellus.tulos();
+        syotekentta.setText("");
+        tuloskentta.setText("" + laskunTulos);
+
+        if (laskunTulos == 0) {
+            nollaa.disableProperty().set(true);
+        } else {
+            nollaa.disableProperty().set(false);
+        }
+        undo.disableProperty().set(false);
     }
 
 }
